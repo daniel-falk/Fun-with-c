@@ -30,3 +30,13 @@ int main() {
 
     return 0;
 }
+
+/*
+ * Compile: gcc -Wall -Werror -pedantic addBias_1.c
+ * Run: ./a.out
+ *
+ * Terminal output:
+ * 4 + 1 = 5
+ * 10 + 1 = 11
+ * 30 + 20 = 50
+ */

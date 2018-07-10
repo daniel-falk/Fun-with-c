@@ -1,0 +1,63 @@
+# Closure in c functions?
+
+If you are used to JavaScript you know about function closure. A function in JavaScript can access all variables above its own scope, even in a parent function after it has closed. Eg. consider the generator for a funtion used to add a bias to a number:
+```
+function addBiasX(x) {
+    let func = function(value) {
+        return x + value;
+    }
+  
+    return func;
+}
+
+let addBias1 = addBiasX(1);
+let addBias20 = addBiasX(20);
+
+console.log("4 + 1 = " + (addBias1(4)).toString());
+console.log("10 + 1 = " + (addBias1(10)).toString());
+console.log("30 + 20 = " + (addBias20(30)).toString());
+
+// Console output:
+// 4 + 1 = 5
+// 10 + 1 = 11
+// 30 + 20 = 50
+```
+
+How would we do the same in ANSI C?
+
+A common answer we might find on internet is that the C language does not support this behaviour, but that you can however do something like the following:
+```
+/* File: addBias_1.c */
+
+```
+
+To avoid the repetition of the struct name we can either use the preprocessor:
+```
+/* File: addBias_2.c */
+
+```
+
+...or we can introduce a new function:
+```
+/* File: addBias_3.c */
+
+```
+
+So far it might seem like there is no need to have the function pointer inside the struct, and therefore we wouldn't need to write the name of the struct twice any way... The use case is ofcourse that now we can allow different kinds of bias with different functions in the background but still hide it from the user. E.g. if we want to be able to choose from an exact bias (like we have had so far) or from a noisy bias:
+```
+/* File: addBias_4.c */
+
+```
+
+So far it seems like a quite nice way to deal with it, C winns again! The problem arives when we want to pass our function to another API which will use it. When designing API's with a user defined callback in C it is common courtesy to include a `void *` for user defined data, this is one of the reasons. Consider the following case where we tell an library function to print a bunch of values using our bias function:
+ ```
+ /* File: addBias_5.c */
+ ```
+
+ In this case we really got saved by the API-author and the fact that he provided us with a chain of user data pointers through the whole callback invocation. What if he was lazy, or for some other reason, didn't provide us with the user data pointer? One way is to make a new preprocessor function for each instance of the addBias function we have and make all addBias instances global so that we can use them from the preprocessor function.
+```
+/* File: addBias_6.c */
+```
+
+ But what if we dynamically at runtime want to decide the number of addBias function variations we want? Since C is a compiled language we can't just create new functions when we need them. This whole problem is one of the things I dislike about C. However what I do like about C is that we can really do whatever we set our minds to, infact I was lying before. We can actually create new functions at runtime, we just need to know enough about the hardware the program is running on so that we can
+ allocate a bit of memory with executable permision and generate some machine code which we put here. Next we can simply pass the address of the start of this memory bit as the callback function. This is however not an easy project, especially not if we want to support several platforms whith different architecture. That's why there are libraries out there we can make use of, e.g. callback in libffcall (FFCALL).
