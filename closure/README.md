@@ -1,7 +1,7 @@
 # Closure in c functions?
 
 If you are used to JavaScript you know about function closure. A function in JavaScript can access all variables above its own scope, even in a parent function after it has closed. Eg. consider the generator for a funtion used to add a bias to a number:
-```
+```js
 function addBiasX(x) {
     let func = function(value) {
         return x + value;
@@ -26,7 +26,7 @@ console.log("30 + 20 = " + (addBias20(30)).toString());
 How would we do the same in ANSI C?
 
 A common answer we might find on internet is that the C language does not support this behaviour, but that you can however do something like the following:
-```
+```c
 /* File: addBias_1.c */
 
 #include <stdio.h>
@@ -74,7 +74,7 @@ int main() {
 ```
 
 To avoid the repetition of the struct name we can either use the preprocessor:
-```
+```c
 /* File: addBias_2.c */
 
 #include <stdio.h>
@@ -114,7 +114,7 @@ int main() {
 ```
 
 ...or we can introduce a new function:
-```
+```c
 /* File: addBias_3.c */
 
 #include <stdio.h>
@@ -156,7 +156,7 @@ int main() {
 ```
 
 So far it might seem like there is no need to have the function pointer inside the struct, and therefore we wouldn't need to write the name of the struct twice any way... The use case is ofcourse that now we can allow different kinds of bias with different functions in the background but still hide it from the user. E.g. if we want to be able to choose from an exact bias (like we have had so far) or from a noisy bias:
-```
+```c
 /* File: addBias_4.c */
 
 #include <stdio.h>
@@ -224,7 +224,7 @@ int main() {
 ```
 
 So far it seems like a quite nice way to deal with it, C winns again! The problem arives when we want to pass our function to another API which will use it. When designing API's with a user defined callback in C it is common courtesy to include a `void *` for user defined data, this is one of the reasons. Consider the following case where we tell an library function to print a bunch of values using our bias function:
- ```
+ ```c
  /* File: addBias_5.c */
 
 #include <stdio.h>
@@ -326,7 +326,7 @@ int main() {
  ```
 
  In this case we really got saved by the API-author and the fact that he provided us with a chain of user data pointers through the whole callback invocation. What if he was lazy, or for some other reason, didn't provide us with the user data pointer? One way is to make a new preprocessor function for each instance of the addBias function we have and make all addBias instances global so that we can use them from the preprocessor function.
-```
+```c
 /* File: addBias_6.c */
 
 #include <stdio.h>
